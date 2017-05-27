@@ -19,10 +19,14 @@ library(psych)
 #dfp[,"zipp"] <-""
 
 df <- readWorksheetFromFile("data/preciosEESS_es.xls", sheet=1, startRow = 5)
+
 load(file="data/gasoC") #cargamos las cercanias
+load(file="data/preciosG")
 
 df$cod <- as.integer(substr(df$"Código.postal", 0, 2))
 df$Precio.gasolina.95 <- as.numeric(gsub(",", ".", df$Precio.gasolina.95))
+df$Precio.gasolina.98 <- as.numeric(gsub(",", ".", df$Precio.gasolina.98))
+df$Precio.gasóleo.A <- as.numeric(gsub(",", ".", df$Precio.gasóleo.A))
 
 df$Longitud <- as.numeric(gsub(",", ".", df$Longitud))
 df$Latitud <- as.numeric(gsub(",", ".", df$Latitud))
@@ -44,9 +48,17 @@ z<-as.integer(count(df))
 
 allG <- readRDS("data/gaso.rds")
 
-allG[1:(z), "adultpop"] <- as.double(df[,"Precio.gasolina.95"]) * 1000
-allG[,"adultpop"] <-gsub(",","",allG[,"adultpop"])
-allG[,"adultpop"] <-as.integer(allG[,"adultpop"])
+allG[1:(z), "G95"] <- as.double(df[,"Precio.gasolina.95"]) * 1000
+allG[,"G95"] <-gsub(",","",allG[,"G95"])
+allG[,"G95"] <-as.integer(allG[,"G95"])
+
+allG[1:(z), "G98"] <- as.double(df[,"Precio.gasolina.98"]) * 1000
+allG[,"G98"] <-gsub(",","",allG[,"G98"])
+allG[,"G98"] <-as.integer(allG[,"G98"])
+
+allG[1:(z), "GA"] <- as.double(df[,"Precio.gasóleo.A"]) * 1000
+allG[,"GA"] <-gsub(",","",allG[,"GA"])
+allG[,"GA"] <-as.integer(allG[,"GA"])
 
 allG[1:z, "latitude"] <- as.numeric(df[,"Latitud"])
 allG[1:z, "longitude"] <- as.numeric(df[,"Longitud"])
@@ -74,7 +86,7 @@ cleantable <- allG %>%
     Rank = rank,
     Score = centile,
     Superzip = superzip,
-    Population = adultpop,
+    Population = G95,
     College = college,
     Income = income,
     Lat = latitude,
@@ -87,4 +99,4 @@ cleantable <- allG %>%
 #  dfp[which(dfp$Direccion == row[1,"dir"]),"zipp"] <- row[1,"codeG"]
 #}
 
-#save(min.d, file = "data/preciosG")
+#save(dfp, file = "data/preciosG")

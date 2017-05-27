@@ -2,16 +2,6 @@ library(leaflet)
 #getwd()         
 #setwd("R/ZipG")      # ORIGINAL
 
-# Choices for drop-downs
-vars <- c(
-  "Is SuperZIP?" = "superzip",
-  "Centile score" = "centile",
-  "College education" = "college",
-  "Median income" = "income",
-  "Population" = "adultpop"
-)
-
-
 navbarPage("Precios combustible", id="nav",
            
            tabPanel("Mapa",
@@ -30,10 +20,9 @@ navbarPage("Precios combustible", id="nav",
                                       draggable = TRUE, top = 60, left = "auto", right = 20, bottom = "auto",
                                       width = 330, height = "auto",
 
-                                      #sliderInput("range", "Precios", min(mapaG$mag), max(mapaG$mag), value = range(mapaG$mag), step = 0.01),
                                       selectInput("provincias","Provincias", codN, multiple=FALSE),
                                       selectInput("rotulos","Rotulos", rotN, multiple=FALSE),  
-                                      dateInput("date",label = h5("Fecha precio"),value = "2017-03-27"),
+                                      dateInput("date",label = h5("Fecha precio"),value = Sys.Date()),
                                       
                                       conditionalPanel("input.color == 'superzip' || input.size == 'superzip'",
                                                        # Only prompt for threshold when coloring or sizing by superzip
