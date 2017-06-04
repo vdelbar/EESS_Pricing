@@ -23,9 +23,7 @@ function(input, output, session) {
     latRng <- range(bounds$north, bounds$south)
     lngRng <- range(bounds$east, bounds$west)
     
-    subset(Gdata,
-           latitude >= latRng[1] & latitude <= latRng[2] &
-             longitude >= lngRng[1] & longitude <= lngRng[2])
+    subset(Gdata, latitude >= latRng[1] & latitude <= latRng[2] & longitude >= lngRng[1] & longitude <= lngRng[2])
   })
   
   # Precalculate the breaks we'll need for the two histograms
@@ -38,7 +36,7 @@ function(input, output, session) {
     
     hist(zipsInBounds()$centile,
          breaks = centileBreaks,
-         main = "SuperZIP score (visible zips)",
+         main = "Precios",
          xlab = "Percentile",
          xlim = range(allG$centile),
          col = '#00DD00',
@@ -51,6 +49,7 @@ function(input, output, session) {
       return(NULL)
     
     print(xyplot(income ~ college, data = zipsInBounds(), xlim = range(allG$college), ylim = range(allG$income)))
+    #print(xyplot(income ~ college, data = zipsInBounds(), xlim = range(allG$college), ylim = range(allG$income)))    
   })
   
   # This observer is responsible for maintaining the circles and legend,according to the variables the user has chosen to map to color and size.

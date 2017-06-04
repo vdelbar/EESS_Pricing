@@ -80,13 +80,8 @@ allG$zipcode <- formatC(allG$zipcode, width=5, format="d", flag="0")
 
 cleantable <- allG %>%
   select(
-    City = city.x,
-    State = state.x,
     Zipcode = zipcode,
-    Rank = rank,
-    Score = centile,
     Superzip = superzip,
-    Population = G95,
     College = college,
     Income = income,
     Lat = latitude,
