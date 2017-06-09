@@ -27,28 +27,29 @@ function(input, output, session) {
   })
   
   # Precalculate the breaks we'll need for the two histograms
-  centileBreaks <- hist(plot = FALSE, allG$centile, breaks = 20)$breaks
+  # centileBreaks <- hist(plot = FALSE, allG$centile, breaks = 20)$breaks
   
   output$histCentile <- renderPlot({
     # If no zipcodes are in view, don't plot
     if (nrow(zipsInBounds()) == 0)
       return(NULL)
     
-    hist(zipsInBounds()$centile,
-         breaks = centileBreaks,
-         main = "Precios",
-         xlab = "Percentile",
-         xlim = range(allG$centile),
+    hist(zipsInBounds()$G95/1000,
+         #breaks = centileBreaks,
+           main = "Precios",
+         xlab = "Euros",
+         xlim = range(allG$G95/1000),
          col = '#00DD00',
          border = 'white')
   })
   
   output$scatterCollegeIncome <- renderPlot({
     # If no zipcodes are in view, don't plot
+
     if (nrow(zipsInBounds()) == 0)
       return(NULL)
     
-    print(xyplot(income ~ college, data = zipsInBounds(), xlim = range(allG$college), ylim = range(allG$income)))
+    #print(xyplot(income ~ college, data = zipsInBounds(), xlim = range(allG$college), ylim = range(allG$income)))
     #print(xyplot(income ~ college, data = zipsInBounds(), xlim = range(allG$college), ylim = range(allG$income)))    
   })
   
@@ -95,12 +96,13 @@ function(input, output, session) {
   # Show a popup at the given location
   showZipcodePopup <- function(zipcode, lat, lng) {
     dia <- as.character(input$date)
-    print(dia)
-
+print ("0")
     if (dia != Sys.Date()) {
       p <- allG[allG$zipcode == zipcode, c("codeG", "rot")]
+      print ("1")
 
       selectedZip <- as.data.frame(dfp[which(dfp$Fecha_Ini == dia & dfp$zipp == p$codeG),c("Gasolina.95.sin.plomo", "Gasóleo.A", "Gasolina.98.ultimate")] )
+      print ("1.1")      
       content <- as.character(tagList(
         tags$h4("Rótulo:", selectedZip$rot),
         #tags$strong(HTML(sprintf("%s", selectedZip$codeG))), 
@@ -109,6 +111,7 @@ function(input, output, session) {
         sprintf("Precio gasolina 98: %s", selectedZip$Gasolina.98.ultimate), tags$br(),
         sprintf("Precio Diesel: %s", selectedZip$Gasóleo.A) ))
     } else  {
+      print ("2")
       selectedZip <- Gdata[Gdata$zipcode == zipcode,]
       content <- as.character(tagList(
         tags$h4("Rótulo:", selectedZip$rot),
@@ -118,7 +121,22 @@ function(input, output, session) {
         sprintf("Precio gasolina 98: %s", selectedZip$G98 / 1000), tags$br(),
         sprintf("Precio Diesel: %s", selectedZip$GA / 1000) ))
     }
-
+    
+    print (selectedZip$codeG)
+    print (min.d[,selectedZip$codeG])
+    
+    #selected1 <- as.data.frame(dfp[which(dfp$zipp == min.d[1,selectedZip$codeG]),c("Gasóleo.A", "Fecha_Ini")] )
+    #selected2 <- as.data.frame(dfp[which(dfp$zipp == min.d[2,selectedZip$codeG]),c("Gasóleo.A", "Fecha_Ini")] )
+    #selected3 <- as.data.frame(dfp[which(dfp$zipp == min.d[3,selectedZip$codeG]),c("Gasóleo.A", "Fecha_Ini")] )
+    
+    #selected <- merge(selected1, selected2, by = "Fecha_Ini")
+    #selected <- merge(selected, selected3, by = "Fecha_Ini")
+    
+    #modeloTG=lm(Gasóleo.A ~ Gasóleo.A.x, data = selected)
+    #summary(modeloTG)    
+    
+    #co2 <- plot(modeloTG)    
+    
     leafletProxy("map") %>% addPopups(lng, lat, content, layerId = zipcode)
   }
   
@@ -126,7 +144,6 @@ function(input, output, session) {
   observe({
     leafletProxy("map") %>% clearPopups()
     event <- input$map_shape_click
-    print (event)
     if (is.null(event))
       return()
     

@@ -36,8 +36,44 @@ min.d <- apply(d, 1, function(x) order(x, decreasing=F)[2:6])
 #se buscan en set3. el numero de fila de set3 es el numero de fila de df
 min.d[,2439]
 
-save(min.d, file = "data/gasoC")
+#save(min.d, file = "data/gasoC")
 
 set3[7455,]
 df[7455,7]
+
+
+
+
+min.d[,2439]
+#selectedZip <- as.data.frame(dfp[which(dfp$Fecha_Ini == dia & dfp$zipp == 2439),c("Gasolina.95.sin.plomo", "Gasóleo.A", "Gasolina.98.ultimate")] )
+selected1 <- as.data.frame(dfp[which(dfp$zipp == 2448),c("Gasóleo.A", "Fecha_Ini")] )
+selected2 <- as.data.frame(dfp[which(dfp$zipp == 2436),c("Gasóleo.A", "Fecha_Ini")] )
+selected3 <- as.data.frame(dfp[which(dfp$zipp == 2433),c("Gasóleo.A", "Fecha_Ini")] )
+
+selected <- merge(selected1, selected2, by = "Fecha_Ini")
+selected <- merge(selected, selected3, by = "Fecha_Ini")
+
+plot(selected)
+
+modeloTG=lm(Gasóleo.A ~ Gasóleo.A.x, data = selected)
+summary(modeloTG)
+
+residuos <- rstandard(modeloTG)
+valores.ajustados <- fitted(modeloTG)
+plot(valores.ajustados, residuos)
+qqnorm(residuos)
+qqline(residuos)
+
+plot(creditosG$litros, creditosG$pre1, xlab = "Edad", ylab = "Grasas")
+abline(modeloTG)
+
+pairs(modeloTG)
+
+plot(creditosG$precio, creditosG$pre1, xlab = "Edad", ylab = "Grasas")
+plot(creditos$income, creditos$Rating, xlab = "Edad", ylab = "Grasas")
+abline(modeloTG)
+
+nuevasG <- seq(1245, 1275)
+predict(modeloTG, nuevasG)
+
 

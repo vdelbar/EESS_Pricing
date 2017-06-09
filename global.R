@@ -77,7 +77,7 @@ allG$zipcode <- formatC(allG$zipcode, width=5, format="d", flag="0")
 #row.names(allG) <- allG$zipcode
 
 #allG<-allG[1:20,]
-
+p <- "vacio"
 cleantable <- allG %>%
   select(
     Zipcode = zipcode,
@@ -95,3 +95,4 @@ cleantable <- allG %>%
 #}
 
 #save(dfp, file = "data/preciosG")
+
