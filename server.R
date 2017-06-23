@@ -96,13 +96,12 @@ function(input, output, session) {
   # Show a popup at the given location
   showZipcodePopup <- function(zipcode, lat, lng) {
     dia <- as.character(input$date)
-print ("0")
+
     if (dia != Sys.Date()) {
       p <- allG[allG$zipcode == zipcode, c("codeG", "rot")]
-      print ("1")
 
       selectedZip <- as.data.frame(dfp[which(dfp$Fecha_Ini == dia & dfp$zipp == p$codeG),c("Gasolina.95.sin.plomo", "Gasóleo.A", "Gasolina.98.ultimate")] )
-      print ("1.1")      
+
       content <- as.character(tagList(
         tags$h4("Rótulo:", selectedZip$rot),
         #tags$strong(HTML(sprintf("%s", selectedZip$codeG))), 
@@ -111,7 +110,6 @@ print ("0")
         sprintf("Precio gasolina 98: %s", selectedZip$Gasolina.98.ultimate), tags$br(),
         sprintf("Precio Diesel: %s", selectedZip$Gasóleo.A) ))
     } else  {
-      print ("2")
       selectedZip <- Gdata[Gdata$zipcode == zipcode,]
       content <- as.character(tagList(
         tags$h4("Rótulo:", selectedZip$rot),
@@ -125,17 +123,25 @@ print ("0")
     print (selectedZip$codeG)
     print (min.d[,selectedZip$codeG])
     
-    #selected1 <- as.data.frame(dfp[which(dfp$zipp == min.d[1,selectedZip$codeG]),c("Gasóleo.A", "Fecha_Ini")] )
-    #selected2 <- as.data.frame(dfp[which(dfp$zipp == min.d[2,selectedZip$codeG]),c("Gasóleo.A", "Fecha_Ini")] )
-    #selected3 <- as.data.frame(dfp[which(dfp$zipp == min.d[3,selectedZip$codeG]),c("Gasóleo.A", "Fecha_Ini")] )
+    selected1 <- as.data.frame(dfp[which(dfp$zipp == min.d[1,selectedZip$codeG]),c("Gasóleo.A", "Fecha_Ini")] )
+    selected2 <- as.data.frame(dfp[which(dfp$zipp == min.d[2,selectedZip$codeG]),c("Gasóleo.A", "Fecha_Ini")] )
+    selected3 <- as.data.frame(dfp[which(dfp$zipp == min.d[3,selectedZip$codeG]),c("Gasóleo.A", "Fecha_Ini")] )
+    selected4 <- as.data.frame(dfp[which(dfp$zipp == min.d[4,selectedZip$codeG]),c("Gasóleo.A", "Fecha_Ini")] )
+    selected5 <- as.data.frame(dfp[which(dfp$zipp == min.d[5,selectedZip$codeG]),c("Gasóleo.A", "Fecha_Ini")] )
+        
+    selected <- merge(selected1, selected2, by = "Fecha_Ini")
+    selected <- merge(selected, selected3, by = "Fecha_Ini")
+    selected <- merge(selected, selected4, by = "Fecha_Ini")
+    selected <- merge(selected, selected5, by = "Fecha_Ini")
     
-    #selected <- merge(selected1, selected2, by = "Fecha_Ini")
-    #selected <- merge(selected, selected3, by = "Fecha_Ini")
+    print ("1")
+    print (nrow(selected))
     
-    #modeloTG=lm(Gasóleo.A ~ Gasóleo.A.x, data = selected)
-    #summary(modeloTG)    
-    
-    #co2 <- plot(modeloTG)    
+    if (nrow(selected) != 0) {
+      modeloTG=lm(Gasóleo.A ~ Gasóleo.A.x, data = selected)
+      summary(modeloTG)   
+      summary(modeloTG)[8]
+    }
     
     leafletProxy("map") %>% addPopups(lng, lat, content, layerId = zipcode)
   }

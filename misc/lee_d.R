@@ -1,5 +1,4 @@
 
-
 setwd("~/precios")
 dir()
 

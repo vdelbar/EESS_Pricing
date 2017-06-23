@@ -44,18 +44,27 @@ df[7455,7]
 
 
 
-min.d[,2439]
+min.d[,5630] #5630
 #selectedZip <- as.data.frame(dfp[which(dfp$Fecha_Ini == dia & dfp$zipp == 2439),c("Gasolina.95.sin.plomo", "Gasóleo.A", "Gasolina.98.ultimate")] )
+selected0 <- as.data.frame(dfp[which(dfp$zipp == 5630),c("Gasóleo.A", "Fecha_Ini")] )
 selected1 <- as.data.frame(dfp[which(dfp$zipp == 2448),c("Gasóleo.A", "Fecha_Ini")] )
 selected2 <- as.data.frame(dfp[which(dfp$zipp == 2436),c("Gasóleo.A", "Fecha_Ini")] )
 selected3 <- as.data.frame(dfp[which(dfp$zipp == 2433),c("Gasóleo.A", "Fecha_Ini")] )
 
-selected <- merge(selected1, selected2, by = "Fecha_Ini")
+selected <- merge(selected0, selected1, by = "Fecha_Ini")
+selected <- merge(selected, selected2, by = "Fecha_Ini")
 selected <- merge(selected, selected3, by = "Fecha_Ini")
-
+colnames(selected) <- c("fecha", "original", "p1", "p2", "p3")
 plot(selected)
 
-modeloTG=lm(Gasóleo.A ~ Gasóleo.A.x, data = selected)
+modeloTG=lm(original ~ p1+ p2+ p3, data = selected)
+summary(modeloTG)
+plot(modeloTG)
+modeloTG=lm(original ~ p1, data = selected)
+summary(modeloTG)
+modeloTG=lm(original ~ p2, data = selected)
+summary(modeloTG)
+modeloTG=lm(original ~ p3, data = selected)
 summary(modeloTG)
 
 residuos <- rstandard(modeloTG)
