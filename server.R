@@ -99,25 +99,10 @@ function(input, output, session) {
 
     if (dia != Sys.Date()) {
       p <- allG[allG$zipcode == zipcode, c("codeG", "rot")]
-
       selectedZip <- as.data.frame(dfp[which(dfp$Fecha_Ini == dia & dfp$zipp == p$codeG),c("Gasolina.95.sin.plomo", "Gasóleo.A", "Gasolina.98.ultimate")] )
 
-      content <- as.character(tagList(
-        tags$h4("Rótulo:", selectedZip$rot),
-        #tags$strong(HTML(sprintf("%s", selectedZip$codeG))), 
-        tags$br(),
-        sprintf("Precio gasolina 95: %s", selectedZip$Gasolina.95.sin.plomo), tags$br(),
-        sprintf("Precio gasolina 98: %s", selectedZip$Gasolina.98.ultimate), tags$br(),
-        sprintf("Precio Diesel: %s", selectedZip$Gasóleo.A) ))
     } else  {
       selectedZip <- Gdata[Gdata$zipcode == zipcode,]
-      content <- as.character(tagList(
-        tags$h4("Rótulo:", selectedZip$rot),
-        tags$strong(HTML(sprintf("%s", selectedZip$codeG))), 
-        tags$br(),
-        sprintf("Precio gasolina 95: %s", selectedZip$G95 / 1000), tags$br(),
-        sprintf("Precio gasolina 98: %s", selectedZip$G98 / 1000), tags$br(),
-        sprintf("Precio Diesel: %s", selectedZip$GA / 1000) ))
     }
     
     print (selectedZip$codeG)
@@ -141,6 +126,26 @@ function(input, output, session) {
       modeloTG=lm(Gasóleo.A ~ Gasóleo.A.x, data = selected)
       summary(modeloTG)   
       summary(modeloTG)[8]
+    }
+
+    if (dia != Sys.Date()) {
+      content <- as.character(tagList(
+        tags$h4("Rótulo:", selectedZip$rot),
+        #tags$strong(HTML(sprintf("%s", selectedZip$codeG))), 
+        tags$br(),
+        #sprintf("Resumen: %s", summary(modeloTG)[8]), tags$br(),        
+        sprintf("Precio gasolina 95: %s", selectedZip$Gasolina.95.sin.plomo), tags$br(),
+        sprintf("Precio gasolina 98: %s", selectedZip$Gasolina.98.ultimate), tags$br(),
+        sprintf("Precio Diesel: %s", selectedZip$Gasóleo.A) ))
+    } else  {
+      content <- as.character(tagList(
+        tags$h4("Rótulo:", selectedZip$rot),
+        tags$strong(HTML(sprintf("%s", selectedZip$codeG))), 
+        tags$br(),
+        #sprintf("Resumen: %s", summary(modeloTG)[8]), tags$br(),        
+        sprintf("Precio gasolina 95: %s", selectedZip$G95 / 1000), tags$br(),
+        sprintf("Precio gasolina 98: %s", selectedZip$G98 / 1000), tags$br(),
+        sprintf("Precio Diesel: %s", selectedZip$GA / 1000) ))
     }
     
     leafletProxy("map") %>% addPopups(lng, lat, content, layerId = zipcode)
