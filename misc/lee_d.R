@@ -1,4 +1,3 @@
-
 setwd("~/precios")
 dir()
 
@@ -20,11 +19,7 @@ for (i in ld) {
 
 for(i in 1:nrow(temp)) { #nrow(temp)
   row <- temp[i,]
-  
-  if (row[1,"zipp"] == 5630)
-  {
-    print ("dentro5630")
-  }
+
 
   allG[which(allG$codeG == row[1,"zipp"]),c("G95", "GA", "G98")] <- row[1,c("Gasolina.95.sin.plomo", "Gasóleo.A", "Gasolina.98.ultimate")] * 1000
 }

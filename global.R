@@ -1,11 +1,10 @@
 library(shiny)
 library(leaflet)
-
 library(RColorBrewer)
 
 options(java.parameters = "-Xmx4g" )
-#library(XLConnect)
 library(readxl)
+library(XLConnect)
 
 library(plyr)
 library(dplyr)
@@ -15,18 +14,12 @@ library(foreign)
 library(ggplot2)
 library(psych)
 
-setwd("~/_PFM") 
-
-#dfp <- readWorksheetFromFile("data/PreciosGasolinas2017.xlsx", sheet=2)
-#dfp[,"zipp"] <-""
-
-#df <- readWorksheetFromFile("data/preciosEESS_es.xls", sheet=1, startRow = 5)
-df <- read_excel("data/preciosEESS_es.xls", sheet=1)
-
+df <- readWorksheetFromFile("data/preciosEESS_es.xls", sheet=1, startRow = 5)
+#df <- read_excel("data/preciosEESS_es.xls", sheet=1)
 load(file="data/gasoC") #cargamos las cercanias
 load(file="data/preciosG")
 
-df$cod <- as.integer(substr(df$Codigopostal, 0, 2))
+df$cod <- as.integer(substr(df$Código.postal, 0, 2))
 df$Precio.gasolina.95 <- as.numeric(gsub(",", ".", df$Precio.gasolina.95))
 df$Precio.gasolina.98 <- as.numeric(gsub(",", ".", df$Precio.gasolina.98))
 df$Precio.gasóleo.A <- as.numeric(gsub(",", ".", df$Precio.gasóleo.A))
@@ -37,6 +30,7 @@ df$Latitud <- as.numeric(gsub(",", ".", df$Latitud))
 df <- df[!is.na(df$Longitud), ]
 df <- df[!is.na(df$Latitud), ]
 df <- df[!is.na(df$Precio.gasolina.95), ]
+df <- df[!is.na(df$Precio.gasóleo.A), ]
 
 codN <- factor(unlist(df[,"Provincia"]))
 codN <- as.list(levels(codN))
@@ -49,7 +43,7 @@ rotN <- c("TODAS", rotN)
 
 z<-as.integer(count(df))
 
-allG <- readRDS("data/gaso.rds")
+allG <- as.data.frame("")
 
 allG[1:(z), "G95"] <- (df[,"Precio.gasolina.95"]) * 1000
 allG[,"G95"] <-gsub(",","",allG[,"G95"])
@@ -74,28 +68,4 @@ allG <- allG[1:z,]
 for(i in 1:nrow(allG)) {
   allG[i,"codeG"] <- i
 }
-
-allG$college <- allG$college * 100
-allG$zipcode <- formatC(allG$zipcode, width=5, format="d", flag="0")
-#row.names(allG) <- allG$zipcode
-
-#allG<-allG[1:20,]
-p <- "vacio"
-cleantable <- allG %>%
-  select(
-    Zipcode = zipcode,
-    Superzip = superzip,
-    College = college,
-    Income = income,
-    Lat = latitude,
-    Long = longitude
-  )
-
-#for(i in 1:nrow(allG)) {
-#  row <- allG[i,]
-
-#  dfp[which(dfp$Direccion == row[1,"dir"]),"zipp"] <- row[1,"codeG"]
-#}
-
-#save(dfp, file = "data/preciosG")
 

@@ -5,7 +5,6 @@ library(lattice)
 library(dplyr)
 
 Gdata <- allG
-#Gdata <- Gdata[order(Gdata$centile),]
 
 function(input, output, session) {
   output$map <- renderLeaflet({
@@ -15,7 +14,7 @@ function(input, output, session) {
       ) %>%  setView(lng = -0.2, lat = 40.36, zoom = 6)
   })
   
-  # A reactive expression that returns the set of zips that are in bounds right now. solo lo hace cuando zoom
+  # solo lo hace cuando zoom
   zipsInBounds <- reactive({
     if (is.null(input$map_bounds))
       return(Gdata[FALSE,])
@@ -25,35 +24,30 @@ function(input, output, session) {
     
     subset(Gdata, latitude >= latRng[1] & latitude <= latRng[2] & longitude >= lngRng[1] & longitude <= lngRng[2])
   })
-  
-  # Precalculate the breaks we'll need for the two histograms
-  # centileBreaks <- hist(plot = FALSE, allG$centile, breaks = 20)$breaks
-  
-  output$histCentile <- renderPlot({
-    # If no zipcodes are in view, don't plot
+
+  output$PGasolina <- renderPlot({
     if (nrow(zipsInBounds()) == 0)
       return(NULL)
-    
     hist(zipsInBounds()$G95/1000,
-         #breaks = centileBreaks,
-           main = "Precios",
+         main = "Precio Gasolina 95",
          xlab = "Euros",
          xlim = range(allG$G95/1000),
          col = '#00DD00',
          border = 'white')
   })
   
-  output$scatterCollegeIncome <- renderPlot({
-    # If no zipcodes are in view, don't plot
-
+  output$PGasoleo <- renderPlot({
     if (nrow(zipsInBounds()) == 0)
       return(NULL)
-    
-    #print(xyplot(income ~ college, data = zipsInBounds(), xlim = range(allG$college), ylim = range(allG$income)))
-    #print(xyplot(income ~ college, data = zipsInBounds(), xlim = range(allG$college), ylim = range(allG$income)))    
+    hist(zipsInBounds()$GA/1000,
+         main = "Precio Gasoleo A",
+         xlab = "Euros",
+         xlim = range(allG$GA/1000),
+         col = '#0FFD00',
+         border = 'white')
   })
   
-  # This observer is responsible for maintaining the circles and legend,according to the variables the user has chosen to map to color and size.
+  
   observe({
     sizeBy <- "G95"
     colorBy <- "G95"
@@ -63,7 +57,6 @@ function(input, output, session) {
     
     if (dia != Sys.Date()) {
       temp <- as.data.frame(dfp[which(dfp$Fecha_Ini == dia),c("Gasolina.95.sin.plomo", "Gasóleo.A", "Gasolina.98.ultimate","zipp")] )
-
       for(i in 1:nrow(temp)) { #nrow(temp)
         row <- temp[i,]
         
@@ -89,20 +82,18 @@ function(input, output, session) {
     radius <- Gdata[[sizeBy]] / max(Gdata[[sizeBy]]) * 120
 
     leafletProxy("map", data = Gdata) %>%
-      clearShapes() %>%
-      addCircles(~longitude, ~latitude, radius=radius, layerId=~zipcode, stroke=FALSE, fillOpacity=0.5, fillColor=pal(colorData)) 
+      clearShapes() %>% addCircles(~longitude, ~latitude, radius=radius, layerId=~codeG, stroke=FALSE, fillOpacity=0.5, fillColor=pal(colorData)) 
   })
   
-  # Show a popup at the given location
-  showZipcodePopup <- function(zipcode, lat, lng) {
+  showZipcodePopup <- function(codeG, lat, lng) {
     dia <- as.character(input$date)
 
     if (dia != Sys.Date()) {
-      p <- allG[allG$zipcode == zipcode, c("codeG", "rot")]
+      p <- allG[allG$codeG == codeG, c("codeG", "rot")]
       selectedZip <- as.data.frame(dfp[which(dfp$Fecha_Ini == dia & dfp$zipp == p$codeG),c("Gasolina.95.sin.plomo", "Gasóleo.A", "Gasolina.98.ultimate")] )
 
     } else  {
-      selectedZip <- Gdata[Gdata$zipcode == zipcode,]
+      selectedZip <- Gdata[Gdata$codeG == codeG,]
     }
     
     print (selectedZip$codeG)
@@ -112,46 +103,56 @@ function(input, output, session) {
     selected2 <- as.data.frame(dfp[which(dfp$zipp == min.d[2,selectedZip$codeG]),c("Gasóleo.A", "Fecha_Ini")] )
     selected3 <- as.data.frame(dfp[which(dfp$zipp == min.d[3,selectedZip$codeG]),c("Gasóleo.A", "Fecha_Ini")] )
     selected4 <- as.data.frame(dfp[which(dfp$zipp == min.d[4,selectedZip$codeG]),c("Gasóleo.A", "Fecha_Ini")] )
-    selected5 <- as.data.frame(dfp[which(dfp$zipp == min.d[5,selectedZip$codeG]),c("Gasóleo.A", "Fecha_Ini")] )
+    #selected5 <- as.data.frame(dfp[which(dfp$zipp == min.d[5,selectedZip$codeG]),c("Gasóleo.A", "Fecha_Ini")] )
         
     selected <- merge(selected1, selected2, by = "Fecha_Ini")
     selected <- merge(selected, selected3, by = "Fecha_Ini")
     selected <- merge(selected, selected4, by = "Fecha_Ini")
-    selected <- merge(selected, selected5, by = "Fecha_Ini")
+    #selected <- merge(selected, selected5, by = "Fecha_Ini"
     
-    print ("1")
-    print (nrow(selected))
-    
-    if (nrow(selected) != 0) {
-      modeloTG=lm(Gasóleo.A ~ Gasóleo.A.x, data = selected)
-      summary(modeloTG)   
-      summary(modeloTG)[8]
-    }
+    if (nrow(selected) != 0 & nrow(selected1) != 0 & nrow(selected2) != 0 & nrow(selected3) != 0 & nrow(selected4) != 0) {
+      colnames(selected) <- c("fecha", "original", "p1", "p2", "p3")
+      modeloTG=lm(original ~ p1+p2+p3, data = selected)
 
-    if (dia != Sys.Date()) {
-      content <- as.character(tagList(
-        tags$h4("Rótulo:", selectedZip$rot),
-        #tags$strong(HTML(sprintf("%s", selectedZip$codeG))), 
-        tags$br(),
-        #sprintf("Resumen: %s", summary(modeloTG)[8]), tags$br(),        
-        sprintf("Precio gasolina 95: %s", selectedZip$Gasolina.95.sin.plomo), tags$br(),
-        sprintf("Precio gasolina 98: %s", selectedZip$Gasolina.98.ultimate), tags$br(),
-        sprintf("Precio Diesel: %s", selectedZip$Gasóleo.A) ))
-    } else  {
-      content <- as.character(tagList(
-        tags$h4("Rótulo:", selectedZip$rot),
-        tags$strong(HTML(sprintf("%s", selectedZip$codeG))), 
-        tags$br(),
-        #sprintf("Resumen: %s", summary(modeloTG)[8]), tags$br(),        
-        sprintf("Precio gasolina 95: %s", selectedZip$G95 / 1000), tags$br(),
-        sprintf("Precio gasolina 98: %s", selectedZip$G98 / 1000), tags$br(),
-        sprintf("Precio Diesel: %s", selectedZip$GA / 1000) ))
+      if (dia != Sys.Date()) {
+        content <- as.character(tagList(
+          tags$h4("Rótulo:", selectedZip$rot),
+          tags$br(),
+          sprintf("R-square: %s", summary(modeloTG)[8]), tags$br(),        
+          sprintf("Precio gasolina 95: %s", selectedZip$Gasolina.95.sin.plomo), tags$br(),
+          sprintf("Precio gasolina 98: %s", selectedZip$Gasolina.98.ultimate), tags$br(),
+          sprintf("Precio Diesel: %s", selectedZip$Gasóleo.A) ))
+      } else  {
+        content <- as.character(tagList(
+          tags$h4("Rótulo:", selectedZip$rot),
+          tags$br(),
+          sprintf("R-square: %s", summary(modeloTG)[8]), tags$br(),        
+          sprintf("Precio gasolina 95: %s", selectedZip$G95 / 1000), tags$br(),
+          sprintf("Precio gasolina 98: %s", selectedZip$G98 / 1000), tags$br(),
+          sprintf("Precio Diesel: %s", selectedZip$GA / 1000) ))
+      }
+      
+    } else
+    {
+      if (dia != Sys.Date()) {
+        content <- as.character(tagList(
+          tags$h4("Rótulo:", selectedZip$rot),
+          tags$h4("No hay datos significativos"),
+          sprintf("Precio gasolina 95: %s", selectedZip$Gasolina.95.sin.plomo), tags$br(),
+          sprintf("Precio gasolina 98: %s", selectedZip$Gasolina.98.ultimate), tags$br(),
+          sprintf("Precio Diesel: %s", selectedZip$Gasóleo.A) ))
+      } else  {
+        content <- as.character(tagList(
+          tags$h4("Rótulo:", selectedZip$rot),
+          tags$h4("No hay datos significativos"),
+          sprintf("Precio gasolina 95: %s", selectedZip$G95 / 1000), tags$br(),
+          sprintf("Precio gasolina 98: %s", selectedZip$G98 / 1000), tags$br(),
+          sprintf("Precio Diesel: %s", selectedZip$GA / 1000) ))
+      }
     }
-    
-    leafletProxy("map") %>% addPopups(lng, lat, content, layerId = zipcode)
+    leafletProxy("map") %>% addPopups(lng, lat, content, layerId = codeG)
   }
   
-  # When map is clicked, show a popup with city info
   observe({
     leafletProxy("map") %>% clearPopups()
     event <- input$map_shape_click
