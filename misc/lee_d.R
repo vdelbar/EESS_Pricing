@@ -1,5 +1,6 @@
+# Preparación de archivo de precios de gasolinera propia en Chiclana. Carga de litros
+
 setwd("~/precios")
-dir()
 
 ld <- list.dirs('/home/vic/precios', recursive = TRUE)
 for (i in ld) {
@@ -19,7 +20,6 @@ for (i in ld) {
 
 for(i in 1:nrow(temp)) { #nrow(temp)
   row <- temp[i,]
-
 
   allG[which(allG$codeG == row[1,"zipp"]),c("G95", "GA", "G98")] <- row[1,c("Gasolina.95.sin.plomo", "Gasóleo.A", "Gasolina.98.ultimate")] * 1000
 }

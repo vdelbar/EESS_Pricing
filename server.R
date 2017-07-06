@@ -47,8 +47,9 @@ function(input, output, session) {
          border = 'white')
   })
   
-  
   observe({
+    ### Para personalizar que tipos de datos se toman en pantalla.
+    
     sizeBy <- "G95"
     colorBy <- "G95"
     
@@ -114,6 +115,12 @@ function(input, output, session) {
       colnames(selected) <- c("fecha", "original", "p1", "p2", "p3")
       modeloTG=lm(original ~ p1+p2+p3, data = selected)
 
+      ### Punto en el que se hace la regresión del modelo. Dada la casuística la variedad y la poca calidad de la información recopilada,
+      ### se opta limitar la búsqueda a las 4 más cercanas y mostrar unicamente el indicador r2 resultado de la misma al considerar
+      ### que el objetivo inicial del proyecto no se ha podido cumplir dad la dificultad de la obtención de los datos.
+      ### Evidentemente y despues del trabajo realizado, queda abierta la puerta a una nueva versión de la aplicación en la que 
+      ### se puedan introducir los litros de cada EESS y realizar la regresión en base a dichos litros y a los precios de las EESS cercanas.
+      
       if (dia != Sys.Date()) {
         content <- as.character(tagList(
           tags$h4("Rótulo:", selectedZip$rot),

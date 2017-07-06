@@ -15,9 +15,10 @@ library(ggplot2)
 library(psych)
 
 df <- readWorksheetFromFile("data/preciosEESS_es.xls", sheet=1, startRow = 5)
-#df <- read_excel("data/preciosEESS_es.xls", sheet=1)
 load(file="data/gasoC") #cargamos las cercanias
-load(file="data/preciosG")
+load(file="data/preciosG") #cargamos archivo de precios externo
+
+### Formateamos y limpiamos datos para mejorar resultados de regresión
 
 df$cod <- as.integer(substr(df$Código.postal, 0, 2))
 df$Precio.gasolina.95 <- as.numeric(gsub(",", ".", df$Precio.gasolina.95))
@@ -32,6 +33,7 @@ df <- df[!is.na(df$Latitud), ]
 df <- df[!is.na(df$Precio.gasolina.95), ]
 df <- df[!is.na(df$Precio.gasóleo.A), ]
 
+### Montamos el desplegable con las provincias en base al DF de Geoportal
 codN <- factor(unlist(df[,"Provincia"]))
 codN <- as.list(levels(codN))
 codN <- c("TODAS", codN)
@@ -42,6 +44,8 @@ rotN <- as.list(levels(rotN))
 rotN <- c("TODAS", rotN)
 
 z<-as.integer(count(df))
+
+### Cargamos dataframe con datos elegidos del excel de geoportal
 
 allG <- as.data.frame("")
 
