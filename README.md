@@ -32,7 +32,6 @@ Despues de estas cargas, se procede a rellenar el Front-End para su visionado co
 
 Dada la poca calidad de los datos obtenidos y sobre todo la imposibilidad de generar una regresión lineal en base a los litros de una gasolinera en concreto, se ha optado por relacionar unicamente los precios obteniendose resultados prometedores como puede verse a continuación,
 
-Call:
 lm(formula = original ~ p1 + p2 + p3, data = selected)
 
 Residuals:
